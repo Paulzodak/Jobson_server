@@ -52,6 +52,7 @@ export const login = async (req, res) => {
           password: passwordIsValid,
           email: user.email,
           imageUrl: user.imageUrl,
+          id: user._id,
         },
         "secretadgjl13579"
       );
