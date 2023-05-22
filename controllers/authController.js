@@ -53,6 +53,10 @@ export const login = async (req, res) => {
           email: user.email,
           imageUrl: user.imageUrl,
           id: user._id,
+          bio: user.bio,
+          stack: user.stack,
+          experienceYears: user.experienceYears,
+          cv: user.cv,
         },
         "secretadgjl13579"
       );
