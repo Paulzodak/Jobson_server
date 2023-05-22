@@ -9,9 +9,6 @@ const userSchema = new mongoose.Schema(
     username: {
       type: String,
     },
-    profession: {
-      type: String,
-    },
     location: {
       type: String,
     },
@@ -27,6 +24,18 @@ const userSchema = new mongoose.Schema(
     },
     imageUrl: {
       type: String,
+      required: false,
+    },
+    stack: {
+      type: String,
+      required: false,
+    },
+    experienceYears: {
+      type: String,
+      required: false,
+    },
+    cv: {
+      type: {},
       required: false,
     },
   },

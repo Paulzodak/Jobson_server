@@ -61,10 +61,10 @@ export const login = async (req, res) => {
     } else {
       return res
         .status(400)
-        .json({ status: "error", body: "password incorrect" });
+        .json({ status: "error", body: "Password incorrect" });
     }
   } else {
-    return res.status(400).json({ status: "error", body: "Error" });
+    return res.status(400).json({ status: "error", body: "No user found" });
   }
 };
 //

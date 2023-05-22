@@ -4,6 +4,7 @@ import mongoose from "mongoose";
 import cors from "cors";
 import authRoutes from "./routes/authRoute.js";
 import jobRoutes from "./routes/jobRoutes.js";
+import userRoutes from "./routes/userRoutes.js";
 const app = express();
 dotenv.config();
 app.use(express.json({ extended: true }));
@@ -16,6 +17,7 @@ const corsOptions = {
 app.use(cors());
 app.use("/api/auth", authRoutes);
 app.use("/api/job", jobRoutes);
+app.use("/api/user", userRoutes);
 app.get("/api", (req, res) => {
   res.send("Welcome to server");
 });
