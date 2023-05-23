@@ -1,5 +1,5 @@
 import puppeteer from "puppeteer";
-import { executablePath } from "puppeteer";
+// import { executablePath } from "puppeteer";
 export const getJobDetails = async (req, res) => {
   // res.setHeader("Access-Control-Allow-Origin", "*");
   // res.setHeader("Access-Control-Allow-Credentials", "true");
@@ -10,13 +10,7 @@ export const getJobDetails = async (req, res) => {
   //   "PUT, POST, GET, DELETE, PATCH, OPTIONS"
   // );
   async function run() {
-    const browser = await puppeteer.launch({
-      headless: "new",
-      executablePath: executablePath(),
-      // `headless: true` (default) enables old Headless;
-      // `headless: 'new'` enables new Headless;
-      // `headless: false` enables “headful” mode.
-    });
+    const browser = await puppeteer.launch();
     const page = await browser.newPage();
     // await page.setDefaultNavigationTimeout(0);
     // console.log(req);
