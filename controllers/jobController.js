@@ -1,4 +1,5 @@
 import puppeteer from "puppeteer";
+import { executablePath } from "puppeteer";
 export const getJobDetails = async (req, res) => {
   // res.setHeader("Access-Control-Allow-Origin", "*");
   // res.setHeader("Access-Control-Allow-Credentials", "true");
@@ -11,6 +12,7 @@ export const getJobDetails = async (req, res) => {
   async function run() {
     const browser = await puppeteer.launch({
       headless: "new",
+      executablePath: executablePath(),
       // `headless: true` (default) enables old Headless;
       // `headless: 'new'` enables new Headless;
       // `headless: false` enables “headful” mode.
