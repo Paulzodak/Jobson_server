@@ -16,7 +16,7 @@ export const getJobDetails = async (req, res) => {
       // `headless: false` enables “headful” mode.
     });
     const page = await browser.newPage();
-    await page.setDefaultNavigationTimeout(0);
+    // await page.setDefaultNavigationTimeout(0);
     // console.log(req);
     if (req.body.url) {
       await page.goto(req.body.url);
