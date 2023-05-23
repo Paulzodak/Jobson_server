@@ -9,7 +9,8 @@
   },
   "scripts": {
     "start": "node index.js",
-    "starttest": "node index.js"
+    "starttest": "node index.js",
+    "gcp-build": "node node_modules/puppeteer/install.js"
   },
   "author": "",
   "license": "ISC",
