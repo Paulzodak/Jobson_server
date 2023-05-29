@@ -177,9 +177,15 @@ dotenv.config();
 app.use(express.json({ extended: true }));
 app.use(express.json({ urlencoded: true }));
 const server = http.createServer(app);
+// const io = new Server(server, {
+//   cors: {
+//     origin: "http://localhost:3000",
+//     methods: ["GET", "POST"],
+//   },
+// });
 const io = new Server(server, {
   cors: {
-    origin: "https://jobson.vercel.app",
+    origin: "https://adetoun-insurance.vercel.app",
     methods: ["GET", "POST"],
   },
 });
@@ -190,8 +196,28 @@ app.use("/api/notifications", notificationRoutes);
 app.get("/api", (req, res) => {
   res.send("Welcome to server");
 });
+const PORT = process.env.PORT || 5000;
+// server.listen(3001, () => {
+//   console.log("SERVER RUNNING");
+// });
+mongoose
+  .connect(
+    `mongodb+srv://ojepaul4jesus:Jobson1234@cluster1.wdzhpyk.mongodb.net/User-data?retryWrites=true&w=majority`,
+    {
+      useNewUrlParser: true,
+      useUnifiedTopology: true,
+    }
+  )
+  .then(() =>
+    server.listen(PORT, () => {
+      console.log("started");
+    })
+  )
+  .catch((err) => {});
+
 io.on("connection", (socket) => {
   console.log(`User Connected: ${socket.id}`);
+
   // Notification.watch().on("change", async (data) => {
   //   const { operationType, fullDocument } = data;
 
@@ -228,20 +254,22 @@ io.on("connection", (socket) => {
   socket.on("connect_error", (err) => {
     console.log(`connect_error due to ${err.message}`);
   });
-  socket.on("fetchNotificationFromClient", async (id) => {
+  socket.on("connectNotification", async (id) => {
     console.log(id);
-    // try {
-    //   const result = await Notification.aggregate([
-    //     // Match documents with the given ID
-    //     { $match: { id: id } },
-    //     // Sort the matched documents by the "createdAt" field in descending order
-    //     // { $sort: { createdAt: -1 } },
-    //   ]);
+    // socket.userid = id;
 
-    //   socket.emit("fetchNotification", result);
-    // } catch (error) {
-    //   socket.emit("fetchNotification", result);
-    // }
+    try {
+      const result = await Notification.aggregate([
+        // Match documents with the given ID
+        { $match: { id: id } },
+        // Sort the matched documents by the "createdAt" field in descending order
+        { $sort: { createdAt: -1 } },
+      ]);
+      console.log("notifications" + result);
+      socket.emit("sendNotificationResult", result);
+    } catch (error) {
+      socket.emit("sendNotificationResult", "error");
+    }
 
     Notification.watch().on("change", async () => {
       // const { operationType, fullDocument } = data;
@@ -254,10 +282,11 @@ io.on("connection", (socket) => {
           // Sort the matched documents by the "createdAt" field in descending order
           { $sort: { createdAt: -1 } },
         ]);
-        console.log(result);
-        socket.emit("fetchNotificationToClient", result);
+        console.log("newchanges" + result);
+
+        socket.emit("sendNotificationResult", result);
       } catch (error) {
-        socket.emit("fetchNotificationToClient", "error");
+        socket.emit("sendNotificationResult", "error");
       }
     });
   });
@@ -286,24 +315,7 @@ io.on("connection", (socket) => {
     console.log("User Disconnected", socket.id);
   });
 });
-const PORT = process.env.PORT || 5000;
-// server.listen(3001, () => {
-//   console.log("SERVER RUNNING");
-// });
-mongoose
-  .connect(
-    `mongodb+srv://ojepaul4jesus:Jobson1234@cluster1.wdzhpyk.mongodb.net/User-data?retryWrites=true&w=majority`,
-    {
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
-    }
-  )
-  .then(() =>
-    server.listen(PORT, () => {
-      console.log("started");
-    })
-  )
-  .catch((err) => {});
+
 User.watch().on("change", async (data) => {
   console.log(data);
   const { operationType, fullDocument } = data;
