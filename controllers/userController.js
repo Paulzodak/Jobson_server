@@ -1,7 +1,7 @@
 import User from "../models/user.js";
 
 export const updateProfile = async (req, res) => {
-  const id = req.body.id;
+  const email = req.body.email;
   const bio = req.body.bio;
   const imageUrl = req.body.imageUrl;
   const stack = req.body.stack;
@@ -10,7 +10,7 @@ export const updateProfile = async (req, res) => {
 
   const user = await User.findOneAndUpdate(
     {
-      id: id,
+      email: email,
     },
     {
       $set: {
