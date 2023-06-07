@@ -22,6 +22,14 @@ const userSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
+    phoneNumber: {
+      type: String,
+      unique: true,
+    },
+    nationality: {
+      type: String,
+    },
+    streetAddress: {},
     imageUrl: {
       type: String,
       required: false,

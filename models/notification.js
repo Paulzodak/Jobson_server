@@ -12,6 +12,9 @@ const notificationSchema = new mongoose.Schema(
     seen: {
       type: Boolean,
     },
+    relativeLink: {
+      type: String,
+    },
   },
   { timestamps: true }
 );

@@ -10,6 +10,8 @@ import userRoutes from "./routes/userRoutes.js";
 import notificationRoutes from "./routes/notification.js";
 import User from "./models/user.js";
 import Notification from "./models/notification.js";
+import { APIURL } from "./utils/utils.js";
+import axios from "axios";
 const app = express();
 app.use(cors());
 dotenv.config();
@@ -49,8 +51,6 @@ mongoose
   )
   .then(() =>
     server.listen(PORT, () => {
-      // console.log("started");
-
       // -------NEEDS REFACTORING-----
       User.watch().on("change", async (data) => {
         // console.log(data);
@@ -120,7 +120,54 @@ mongoose
   .catch((err) => {});
 
 io.on("connection", (socket) => {
-  // console.log(`User Connected: ${socket.id}`);
+  console.log("i ran");
+
+  // socket.on("getJobs", async () => {
+  //   let pages = 10;
+  //   const results = [];
+  //   try {
+  //     for (let i = 1; i < pages; i++) {
+  //       const response = await axios.get(APIURL, {
+  //         params: {
+  //           page: i,
+  //           descending: true,
+  //           category: "Software Engineering",
+  //         },
+  //       });
+  //       // console.log(response);
+  //       results.push(...response.data.results);
+  //       // response.data.results.map((item) => results.push(item));
+  //       // pages = response.data.page_count;
+  //     }
+  //     socket.on("loadMore", async () => {
+  //       const results = [];
+  //       try {
+  //         for (let i = 10; i < 21; i++) {
+  //           const response = await axios.get(APIURL, {
+  //             params: {
+  //               page: i,
+  //               descending: true,
+  //               category: "Software Engineering",
+  //             },
+  //           });
+  //           // console.log(response);
+  //           results.push(...response.data.results);
+  //           // response.data.results.map((item) => results.push(item));
+  //           // pages
+  //         }
+  //       } catch {}
+  //     });
+  //     // console.log(results);
+  //     console.log(results.length);
+  //     // return results;
+  //     socket.on("getJobsWithFilter", async (filter) => {
+  //       const filteredResult = results.filter((item) =>
+  //         item.name.toLowerCase().includes(filter)
+  //       );
+  //       socket.emit("filterResult", filteredResult);
+  //     });
+  //   } catch {}
+  // });
 
   socket.on("connect_error", (err) => {
     // console.log(`connect_error due to ${err.message}`);
