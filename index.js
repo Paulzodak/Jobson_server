@@ -10,26 +10,25 @@ import userRoutes from "./routes/userRoutes.js";
 import notificationRoutes from "./routes/notification.js";
 import User from "./models/user.js";
 import Notification from "./models/notification.js";
-import { APIURL } from "./utils/utils.js";
-import axios from "axios";
+import Settings from "./models/settings.js";
 const app = express();
 app.use(cors());
 dotenv.config();
 app.use(express.json({ extended: true }));
 app.use(express.json({ urlencoded: true }));
 const server = http.createServer(app);
-// const io = new Server(server, {
-//   cors: {
-//     origin: "http://localhost:3000",
-//     methods: ["GET", "POST"],
-//   },
-// });
 const io = new Server(server, {
   cors: {
-    origin: "https://https://jobson.vercel.app",
+    origin: "http://localhost:3001",
     methods: ["GET", "POST"],
   },
 });
+// const io = new Server(server, {
+//   cors: {
+//     origin: "https://https://jobson.vercel.app",
+//     methods: ["GET", "POST"],
+//   },
+// });
 app.use("/api/auth", authRoutes);
 app.use("/api/job", jobRoutes);
 app.use("/api/user", userRoutes);
@@ -50,7 +49,9 @@ mongoose
     }
   )
   .then(() =>
+    // console.log('connected')
     server.listen(PORT, () => {
+      console.log("connected");
       // -------NEEDS REFACTORING-----
       User.watch().on("change", async (data) => {
         // console.log(data);
@@ -249,6 +250,49 @@ io.on("connection", (socket) => {
       await Notification.deleteMany({
         id: id,
       });
+    } catch (error) {}
+  });
+  socket.on("connectSettings", async (email) => {
+    try {
+      const result = await Settings.aggregate([
+        // Match documents with the given ID
+        { $match: { email: email } },
+        // Sort the matched documents by the "createdAt" field in descending order
+        { $sort: { createdAt: -1 } },
+      ]);
+      // console.log("notifications" + result);
+      socket.emit("sendSettings", result);
+    } catch (error) {
+      socket.emit("sendSettings", "error");
+    }
+
+    Settings.watch().on("change", async () => {
+      console.log("i noticed changed");
+      try {
+        const result = await Settings.aggregate([{ $match: { email: email } }]);
+        socket.emit("sendSettings", result);
+      } catch (error) {
+        socket.emit("sendSettings", "error");
+      }
+    });
+  });
+  socket.on("updateSettings", async (props) => {
+    console.log(props);
+    try {
+      await Settings.findOneAndUpdate(
+        {
+          email: props.email,
+        },
+        {
+          $set: {
+            newsAndUpdates: props.newsAndUpdates,
+            tipsAndTutorial: props.tipsAndTutorial,
+            reminders: props.reminders,
+            accountSummary: props.accountSummary,
+          },
+        },
+        { returnOriginal: false }
+      );
     } catch (error) {}
   });
 

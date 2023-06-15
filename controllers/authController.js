@@ -2,6 +2,7 @@ import mongoose from "mongoose";
 import User from "../models/user.js";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
+import Settings from "../models/settings.js";
 export const signup = async (req, res) => {
   // res.setHeader("Access-Control-Allow-Origin", "*");
   // res.setHeader("Access-Control-Allow-Credentials", "true");
@@ -18,10 +19,19 @@ export const signup = async (req, res) => {
     email: req.body.email,
     password: password,
   });
+  const settings = new Settings({
+    email: req.body.email,
+    newsAndUpdates: true,
+    tipsAndTutorial: true,
+    reminders: true,
+    accountSummary: true,
+  });
   try {
     await user.save();
+    await settings.save();
     res.status(201).json(user);
   } catch (error) {
+    console.log(error);
     res.status(409).json({
       error: error.message,
     });
