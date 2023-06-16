@@ -11,6 +11,7 @@ import notificationRoutes from "./routes/notification.js";
 import User from "./models/user.js";
 import Notification from "./models/notification.js";
 import Settings from "./models/settings.js";
+import SavedJobs from "./models/savedJobs.js";
 const app = express();
 app.use(cors());
 dotenv.config();
@@ -293,6 +294,50 @@ io.on("connection", (socket) => {
         },
         { returnOriginal: false }
       );
+    } catch (error) {}
+  });
+  socket.on("connectSavedJobs", async (email) => {
+    try {
+      const result = await SavedJobs.aggregate([
+        // Match documents with the given ID
+        { $match: { email: email } },
+        // Sort the matched documents by the "createdAt" field in descending order
+        { $sort: { createdAt: -1 } },
+      ]);
+      // console.log("notifications" + result);
+      socket.emit("sendSavedJobs", result);
+    } catch (error) {
+      socket.emit("sendSavedJobs", "error");
+    }
+
+    SavedJobs.watch().on("change", async () => {
+      console.log("i noticed changed");
+      try {
+        const result = await SavedJobs.aggregate([
+          { $match: { email: email } },
+        ]);
+        socket.emit("sendSavedJobs", result);
+      } catch (error) {
+        socket.emit("sendSavedJobs", "error");
+      }
+    });
+  });
+  socket.on("addToSavedJobs", async (props) => {
+    const savedJobs = new SavedJobs({
+      ...props,
+    });
+    try {
+      await savedJobs.save();
+    } catch (error) {
+      console.log(error);
+    }
+  });
+  socket.on("deleteJob", async (id) => {
+    // console.log("i ran");
+    try {
+      await SavedJobs.deleteOne({
+        id: id,
+      });
     } catch (error) {}
   });
 
