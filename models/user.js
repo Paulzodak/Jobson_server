@@ -48,6 +48,14 @@ const userSchema = new mongoose.Schema(
     profileVerified: {
       type: Boolean,
     },
+    authType: {
+      type: String,
+      required: true,
+    },
+    uid: {
+      type: String,
+      required: false,
+    },
   },
   { timestamps: true }
 );

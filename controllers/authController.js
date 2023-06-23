@@ -4,20 +4,13 @@ import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import Settings from "../models/settings.js";
 export const signup = async (req, res) => {
-  // res.setHeader("Access-Control-Allow-Origin", "*");
-  // res.setHeader("Access-Control-Allow-Credentials", "true");
-  // res.setHeader("Access-Control-Max-Age", "1800");
-  // res.setHeader("Access-Control-Allow-Headers", "content-type");
-  // res.setHeader(
-  //   "Access-Control-Allow-Methods",
-  //   "PUT, POST, GET, DELETE, PATCH, OPTIONS"
-  // );
   console.log(req.body);
   const password = await bcrypt.hash(req.body.password, 10);
   const user = new User({
     fullname: req.body.fullname,
     email: req.body.email,
     password: password,
+    authType: "emailAndPassword",
   });
   const settings = new Settings({
     email: req.body.email,
@@ -38,15 +31,6 @@ export const signup = async (req, res) => {
   }
 };
 export const login = async (req, res) => {
-  // res.setHeader("Access-Control-Allow-Origin", "*");
-  // res.setHeader("Access-Control-Allow-Credentials", "true");
-  // res.setHeader("Access-Control-Max-Age", "1800");
-  // res.setHeader("Access-Control-Allow-Headers", "content-type");
-  // res.setHeader(
-  //   "Access-Control-Allow-Methods",
-  //   "PUT, POST, GET, DELETE, PATCH, OPTIONS"
-  // );
-
   const user = await User.findOne({
     email: req.body.email,
   });
@@ -82,3 +66,76 @@ export const login = async (req, res) => {
   }
 };
 //
+export const authWithGoogle = async (req, res) => {
+  const user = await User.findOne({
+    email: req.body.email,
+  });
+  if (user) {
+    console.log("user exists");
+    const token = jwt.sign(
+      {
+        fullname: user.fullname,
+        password: true,
+        email: user.email,
+        imageUrl: user.imageUrl,
+        id: user._id,
+        bio: user.bio,
+        stack: user.stack,
+        experienceYears: user.experienceYears,
+        cv: user.cv,
+      },
+      "secretadgjl13579"
+    );
+
+    return res.status(201).json({ status: "ok", user: token });
+  } else if (!user) {
+    console.log("user does not exists");
+    const newUser = new User({
+      fullname: req.body.fullname,
+      email: req.body.email,
+      password: req.body.uid,
+      uid: req.body.uid,
+      authType: "emailAndPassword",
+    });
+    const settings = new Settings({
+      email: req.body.email,
+      newsAndUpdates: true,
+      tipsAndTutorial: true,
+      reminders: true,
+      accountSummary: true,
+    });
+    try {
+      console.log("creating new user");
+      await newUser.save();
+      await settings.save();
+      const token = jwt.sign(
+        {
+          fullname: newUser.fullname,
+          password: true,
+          email: newUser.email,
+          imageUrl: newUser.imageUrl,
+          id: newUser._id,
+          bio: newUser.bio,
+          stack: newUser.stack,
+          experienceYears: newUser.experienceYears,
+          cv: newUser.cv,
+        },
+        "secretadgjl13579"
+      );
+      return res.status(201).json({ status: "ok", user: token });
+    } catch (error) {
+      console.log(error);
+      res.status(409).json({
+        error: error.message,
+      });
+    }
+  }
+  //    else {
+  //     return res
+  //       .status(400)
+  //       .json({ status: "error", body: "Password incorrect" });
+  //   }
+  // else {
+  //   return res.status(400).json({ status: "error", body: "No user found" });
+  // }
+};

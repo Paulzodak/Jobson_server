@@ -39,7 +39,7 @@ app.get("/api", (req, res) => {
 });
 const PORT = process.env.PORT || 5000;
 // server.listen(3001, () => {
-//   console.log("SERVER RUNNING");
+
 // });
 mongoose
   .connect(
@@ -50,12 +50,9 @@ mongoose
     }
   )
   .then(() =>
-    // console.log('connected')
     server.listen(PORT, () => {
-      console.log("connected");
       // -------NEEDS REFACTORING-----
       User.watch().on("change", async (data) => {
-        // console.log(data);
         const { operationType, fullDocument } = data;
         const user = await User.findOne({
           _id: data.documentKey._id,
@@ -69,9 +66,8 @@ mongoose
           });
           try {
             await notification.save();
-          } catch (error) {
-            // console.log(error);
-          }
+          } catch (error) {}
+
           const notification2 = new Notification({
             id: user._id.toString(),
             title: `Next step ${user.fullname}`,
@@ -80,14 +76,11 @@ mongoose
           });
           try {
             await notification2.save();
-          } catch (error) {
-            // console.log(error);
-          }
+          } catch (error) {}
         }
         if (operationType === "update") {
           // const { _id, email, imageUrl } = fullDocument;
 
-          // console.log(user);
           // Notification.aggregate([
           //   // Match documents with the given ID
           //   { $match: { id: user._id } },
@@ -101,8 +94,7 @@ mongoose
             !user.stack ||
             !user.bio
           ) {
-            // console.log("updatee profile");
-            const notification = new Notification({
+            const updateNotification = new Notification({
               id: user._id.toString(),
               title: "Please update your profile!",
               seen: false,
@@ -110,10 +102,8 @@ mongoose
                 "Please update your profile to allow our engines generate more accurate job listing",
             });
             try {
-              await notification.save();
-            } catch (error) {
-              // console.log(error);
-            }
+              await updateNotification.save();
+            } catch (error) {}
           }
         }
       });
@@ -122,8 +112,6 @@ mongoose
   .catch((err) => {});
 
 io.on("connection", (socket) => {
-  console.log("i ran");
-
   // socket.on("getJobs", async () => {
   //   let pages = 10;
   //   const results = [];
@@ -136,7 +124,7 @@ io.on("connection", (socket) => {
   //           category: "Software Engineering",
   //         },
   //       });
-  //       // console.log(response);
+
   //       results.push(...response.data.results);
   //       // response.data.results.map((item) => results.push(item));
   //       // pages = response.data.page_count;
@@ -152,15 +140,14 @@ io.on("connection", (socket) => {
   //               category: "Software Engineering",
   //             },
   //           });
-  //           // console.log(response);
+
   //           results.push(...response.data.results);
   //           // response.data.results.map((item) => results.push(item));
   //           // pages
   //         }
   //       } catch {}
   //     });
-  //     // console.log(results);
-  //     console.log(results.length);
+
   //     // return results;
   //     socket.on("getJobsWithFilter", async (filter) => {
   //       const filteredResult = results.filter((item) =>
@@ -171,11 +158,8 @@ io.on("connection", (socket) => {
   //   } catch {}
   // });
 
-  socket.on("connect_error", (err) => {
-    // console.log(`connect_error due to ${err.message}`);
-  });
+  socket.on("connect_error", (err) => {});
   socket.on("connectNotification", async (id) => {
-    // console.log(id);
     // socket.userid = id;
 
     try {
@@ -185,7 +169,7 @@ io.on("connection", (socket) => {
         // Sort the matched documents by the "createdAt" field in descending order
         { $sort: { createdAt: -1 } },
       ]);
-      // console.log("notifications" + result);
+
       socket.emit("sendNotificationResult", result);
     } catch (error) {
       socket.emit("sendNotificationResult", "error");
@@ -193,7 +177,6 @@ io.on("connection", (socket) => {
 
     Notification.watch().on("change", async () => {
       // const { operationType, fullDocument } = data;
-      // console.log("new change");
 
       try {
         const result = await Notification.aggregate([
@@ -202,7 +185,6 @@ io.on("connection", (socket) => {
           // Sort the matched documents by the "createdAt" field in descending order
           { $sort: { createdAt: -1 } },
         ]);
-        // console.log("newchanges" + result);
 
         socket.emit("sendNotificationResult", result);
       } catch (error) {
@@ -226,7 +208,6 @@ io.on("connection", (socket) => {
     } catch (error) {}
   });
   socket.on("updateAllNotification", async (id) => {
-    // console.log("i ran");
     try {
       await Notification.updateMany(
         {
@@ -246,7 +227,6 @@ io.on("connection", (socket) => {
     } catch (error) {}
   });
   socket.on("deleteAllNotification", async (id) => {
-    // console.log("i ran");
     try {
       await Notification.deleteMany({
         id: id,
@@ -261,14 +241,13 @@ io.on("connection", (socket) => {
         // Sort the matched documents by the "createdAt" field in descending order
         { $sort: { createdAt: -1 } },
       ]);
-      // console.log("notifications" + result);
+
       socket.emit("sendSettings", result);
     } catch (error) {
       socket.emit("sendSettings", "error");
     }
 
     Settings.watch().on("change", async () => {
-      console.log("i noticed changed");
       try {
         const result = await Settings.aggregate([{ $match: { email: email } }]);
         socket.emit("sendSettings", result);
@@ -278,7 +257,6 @@ io.on("connection", (socket) => {
     });
   });
   socket.on("updateSettings", async (props) => {
-    console.log(props);
     try {
       await Settings.findOneAndUpdate(
         {
@@ -304,14 +282,13 @@ io.on("connection", (socket) => {
         // Sort the matched documents by the "createdAt" field in descending order
         { $sort: { createdAt: -1 } },
       ]);
-      // console.log("notifications" + result);
+
       socket.emit("sendSavedJobs", result);
     } catch (error) {
       socket.emit("sendSavedJobs", "error");
     }
 
     SavedJobs.watch().on("change", async () => {
-      console.log("i noticed changed");
       try {
         const result = await SavedJobs.aggregate([
           { $match: { email: email } },
@@ -328,12 +305,9 @@ io.on("connection", (socket) => {
     });
     try {
       await savedJobs.save();
-    } catch (error) {
-      console.log(error);
-    }
+    } catch (error) {}
   });
   socket.on("deleteJob", async (id) => {
-    // console.log("i ran");
     try {
       await SavedJobs.deleteOne({
         id: id,
@@ -341,7 +315,5 @@ io.on("connection", (socket) => {
     } catch (error) {}
   });
 
-  socket.on("disconnect", () => {
-    // console.log("User Disconnected", socket.id);
-  });
+  socket.on("disconnect", () => {});
 });
